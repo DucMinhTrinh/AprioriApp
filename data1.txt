@@ -1,0 +1,9 @@
+# Test data for the Apriori algorithm
+# One transaction per line, items are separated with whitespaces
+
+bread   butter  sugar
+coffee  milk    sugar
+bread   coffee  milk    sugar
+coffee  milk
+ga ca milk
+milk
