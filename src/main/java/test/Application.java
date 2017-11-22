@@ -26,9 +26,9 @@ import java.util.Iterator;
 public class Application {
 
     public static void main(String[] args) {
-        String filePath = "data1.txt";
+        String filePath = "data.txt";
         File inputFile = new File(filePath);
-        double minSupport = 0.5;
+        double minSupport = 0.05;
         double minConfidence = 0.8;
         Apriori<NamedItem> apriori =  new Apriori.Builder<NamedItem>(minSupport).generateRules(minConfidence).create();
         Iterator<Transaction<NamedItem>> iterator = new DataIterator(inputFile);

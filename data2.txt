@@ -1,0 +1,5 @@
+# Test data for the Apriori algorithm
+# One transaction per line, items are separated with whitespaces
+
+22633   22632
+22632   22633

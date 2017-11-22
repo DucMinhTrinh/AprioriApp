@@ -6,10 +6,15 @@
 package Thread;
 
 import com.monitorjbl.xlsx.StreamingReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -30,6 +35,11 @@ public class ProcessingExcelFile implements ProcessExcel {
     private int transactionNumber;
     private JSONArray listTransaction;
     Workbook workbook = null;
+
+    public ProcessingExcelFile() {
+    }
+
+    ;
 
     public ProcessingExcelFile(String filePath) {
         this.filePath = filePath;
@@ -54,7 +64,7 @@ public class ProcessingExcelFile implements ProcessExcel {
                             JSONObject json = new JSONObject();
                             json.put("index", index++);
                             json.put("value", c.getStringCellValue());
-                            listColumn.put(json);
+                            listColumn.put(json);                            
                         }
                         break;
                     }
@@ -130,7 +140,7 @@ public class ProcessingExcelFile implements ProcessExcel {
                 return result;
             }
             _new.put("list", itemList);
-            System.out.println(_new);
+//            System.out.println(_new);
             result.put(_new);
             current = temp;
             transactionNumber++;
@@ -140,17 +150,52 @@ public class ProcessingExcelFile implements ProcessExcel {
         return result;
     }
 
-    public static void main(String[] args) {
-        String filePath = "data/OnlineRetail.xlsx";
-        ProcessingExcelFile demo = new ProcessingExcelFile(filePath);
-        System.out.println("Number instance : " + demo.getInstanceNumber());
-        System.out.println("Table of columns");
-        JSONArray list = demo.listColumn();
-        for (int i = 0; i < list.length(); i++) {
-            JSONObject obj = list.getJSONObject(i);
-            System.out.println(obj);
+    public void convertToTxt(int collumId, int collumItem) {
+
+        JSONArray listT = this.listTransaction(this.listColumn.getJSONObject(collumId), this.listColumn.getJSONObject(collumItem));
+        try {
+            //Bước 1: Tạo đối tượng luồng và liên kết nguồn dữ liệu
+            File f = new File(System.getProperty("user.dir") + "/data.txt");
+            FileWriter fw = new FileWriter(f);
+
+            //Bước 2: Ghi dữ liệu
+            for (int i = 0; i < listT.length(); i++) {
+                JSONObject obj = listT.getJSONObject(i);
+                JSONArray itemSet = obj.getJSONArray("list");
+                for (int j = 0; j < itemSet.length(); j++) {
+//                    System.out.println(itemSet.get(j));
+                    fw.write(itemSet.get(j).toString());
+                    if (j < itemSet.length() - 1) {
+                        fw.write("   ");
+                    }
+                }
+                fw.write("\r\n");
+//                fw.write(obj[0]);
+            }
+
+            //Bước 3: Đóng luồng
+            fw.close();
+        } catch (IOException ex) {
+            System.out.println("Loi ghi file: " + ex);
         }
-        demo.listTransaction(list.getJSONObject(0), list.getJSONObject(1));
+    }
+
+    public static void main(String[] args) {
+//        String filePath = "data/OnlineRetail2.xlsx";
+//        ProcessingExcelFile demo = new ProcessingExcelFile(filePath);
+//        demo.convertToTxt(0, 1);
+//        System.out.println("Number instance : " + demo.getInstanceNumber());
+//        System.out.println("Table of columns");
+//        JSONArray list = demo.listColumn();
+//        for (int i = 0; i < list.length(); i++) {
+//            JSONObject obj = list.getJSONObject(i);
+////            System.out.println(obj);
+//        }
+//        JSONArray listT = demo.listTransaction(list.getJSONObject(7), list.getJSONObject(1));
+//         for (int i = 0; i < listT.length(); i++) {
+//            JSONObject obj = listT.getJSONObject(i);
+//            System.out.println(obj);
+//        }
 
     }
 }

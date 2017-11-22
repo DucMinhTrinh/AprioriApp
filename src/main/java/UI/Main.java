@@ -5,16 +5,48 @@
  */
 package UI;
 
+import Thread.ProcessingExcelFile;
+import com.monitorjbl.xlsx.StreamingReader;
+import de.mrapp.apriori.Apriori;
+import de.mrapp.apriori.AssociationRule;
+import de.mrapp.apriori.FrequentItemSets;
+import de.mrapp.apriori.ItemSet;
+import de.mrapp.apriori.Output;
+import de.mrapp.apriori.RuleSet;
+import de.mrapp.apriori.Transaction;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import test.DataIterator;
+import test.NamedItem;
+
 /**
  *
  * @author MinhPC
  */
 public class Main extends javax.swing.JFrame {
 
+    private ArrayList<String> listCriteria;
+    String filePath;
+    Boolean changeAttribute = false;
+
     /**
      * Creates new form Main
      */
     public Main() {
+        this.setSize(1650,1080);
         initComponents();
     }
 
@@ -27,31 +59,212 @@ public class Main extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jButton1 = new javax.swing.JButton();
+        jComboBox1 = new javax.swing.JComboBox();
+        jComboBox2 = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jTextField2 = new javax.swing.JTextField();
+        jButton2 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jLabel5 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setText("jLabel1");
+        jButton1.setText("Excel");
+        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton1MouseClicked(evt);
+            }
+        });
+
+        jLabel1.setText("Criteria");
+
+        jLabel2.setText("Item");
+
+        jLabel3.setText("MinSupport");
+
+        jLabel4.setText("MinConf");
+
+        jButton2.setText("Excute");
+        jButton2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton2MouseClicked(evt);
+            }
+        });
+
+        jLabel5.setText("frequent");
+        jScrollPane1.setViewportView(jLabel5);
+
+        jLabel6.setText("rules");
+        jScrollPane2.setViewportView(jLabel6);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(284, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addGap(280, 280, 280))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(54, 54, 54)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addGap(26, 26, 26)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(9, 9, 9)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 298, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jTextField1)
+                            .addComponent(jTextField2, javax.swing.GroupLayout.DEFAULT_SIZE, 114, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton2)
+                        .addGap(297, 297, 297))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 348, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addContainerGap(328, Short.MAX_VALUE))
+                .addGap(31, 31, 31)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3)
+                    .addComponent(jButton2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4)
+                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(88, 88, 88)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 316, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(79, 79, 79)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 325, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(59, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
+        // TODO add your handling code here:
+        JFileChooser jf = new JFileChooser();
+        jf.setCurrentDirectory(new File(System.getProperty("user.dir")));
+
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivos excel", "xls", "xlsx");
+        jf.addChoosableFileFilter(filter);
+        int option = jf.showSaveDialog(null);
+
+        if (option == JFileChooser.APPROVE_OPTION) {
+            changeAttribute = true;
+            filePath = jf.getSelectedFile().getAbsolutePath();
+            File file = new File(filePath);
+            InputStream is = null;
+            try {
+                is = new FileInputStream(file);
+                Workbook workbook = StreamingReader.builder()
+                        .rowCacheSize(100) // number of rows to keep in memory (defaults to 10)
+                        .bufferSize(4096) // buffer size to use when reading InputStream to file (defaults to 1024)
+                        .open(is);
+                Sheet mysheet = workbook.getSheetAt(0);
+
+                for (Row r : mysheet) {
+                    for (Cell c : r) {
+                        jComboBox1.addItem(c.getStringCellValue());
+                        jComboBox2.addItem(c.getStringCellValue());
+                    }
+                    break;
+                }
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Chọn file excel ");
+        }
+    }//GEN-LAST:event_jButton1MouseClicked
+
+    private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
+        // TODO add your handling code here:
+        // convert dữ liệu từ file excel thành file txt
+        if(filePath!=null) {
+            if(changeAttribute=true){
+                ProcessingExcelFile pef = new ProcessingExcelFile(filePath);
+                pef.convertToTxt(jComboBox1.getSelectedIndex(),jComboBox2.getSelectedIndex());
+                changeAttribute=false;
+            }
+
+            // thực hiện phân tích bằng thuật toán Apriori
+            String filePathtxt = "data.txt";
+            File inputFile = new File(filePathtxt);
+            double minSupport = Double.parseDouble(jTextField1.getText().toString());
+            double minConfidence = Double.parseDouble(jTextField2.getText().toString());
+            Apriori<NamedItem> apriori =  new Apriori.Builder<NamedItem>(minSupport).generateRules(minConfidence).create();
+            Iterator<Transaction<NamedItem>> iterator = new DataIterator(inputFile);
+
+            Output<NamedItem> output = apriori.execute(iterator);
+
+
+    //        Filter<ItemSet> filter = Filter.forItemSets().bySize(2);
+            FrequentItemSets<NamedItem> frequentItemSets = output.getFrequentItemSets();
+    //        frequentItemSets = frequentItemSets.filter(filter);
+            long timeExcute = output.getRuntime();
+            System.out.println("Time Running:"+timeExcute + " ms.") ;
+            System.out.println("Frequent Items Number is : "+frequentItemSets.size());
+
+
+            //In ra các dánh sách phổ biên
+            Iterator<ItemSet<NamedItem>> it = frequentItemSets.iterator();
+            String frequentStr="<html>";
+            while (it.hasNext()) {
+                ItemSet<NamedItem> next = it.next();
+    //            System.out.println(next.toString()+" - " +next.getSupport());  
+                frequentStr +=next.toString()+" - " +next.getSupport() +"<br>";
+            }
+            jLabel5.setText(frequentStr);
+
+            //Luật liên kết
+            RuleSet<NamedItem> ruleSet = output.getRuleSet();
+            Iterator<AssociationRule<NamedItem>> itRule = ruleSet.iterator();
+            String rules ="<html>";
+            while(itRule.hasNext()){
+                AssociationRule<NamedItem> a =itRule.next();
+                rules += a.toString()+"<br>";;
+    //            System.out.println(a.getBody().toString()+"====>");
+    //            System.out.println(a.getHead().toString());       
+            }
+    //        JOptionPane.showMessageDialog(rootPane,rules);
+            jLabel6.setText(rules);
+        }else{
+            JOptionPane.showMessageDialog(rootPane,"Chọn file excel");
+        }
+    }//GEN-LAST:event_jButton2MouseClicked
 
     /**
      * @param args the command line arguments
@@ -89,6 +302,19 @@ public class Main extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JComboBox jComboBox1;
+    private javax.swing.JComboBox jComboBox2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
 }
