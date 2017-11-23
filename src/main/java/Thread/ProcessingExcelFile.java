@@ -15,6 +15,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -35,6 +40,7 @@ public class ProcessingExcelFile implements ProcessExcel {
     private int transactionNumber;
     private JSONArray listTransaction;
     Workbook workbook = null;
+    HSSFWorkbook wb_xls = null;
 
     public ProcessingExcelFile() {
     }
@@ -64,7 +70,7 @@ public class ProcessingExcelFile implements ProcessExcel {
                             JSONObject json = new JSONObject();
                             json.put("index", index++);
                             json.put("value", c.getStringCellValue());
-                            listColumn.put(json);                            
+                            listColumn.put(json);
                         }
                         break;
                     }
@@ -76,6 +82,52 @@ public class ProcessingExcelFile implements ProcessExcel {
                 }
             } else if (file.getName().contains(".xls")) {
                 /*Xử lý file khi là dạng xls*/
+                try {
+                    POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(file));
+                    wb_xls = new HSSFWorkbook(fs);
+                    HSSFSheet sheet = wb_xls.getSheetAt(0);
+                    HSSFRow row;
+                    HSSFCell cell;
+
+                    int rows; // No of rows
+                    rows = sheet.getPhysicalNumberOfRows();
+
+                    int cols = 0; // No of columns
+                    int tmp = 0;
+
+                    // This trick ensures that we get the data properly even if it doesn't start from first few rows
+                    for (int i = 0; i < 10 || i < rows; i++) {
+                        row = sheet.getRow(i);
+                        if (row != null) {
+                            tmp = sheet.getRow(i).getPhysicalNumberOfCells();
+                            if (tmp > cols) {
+                                cols = tmp;
+                            }
+                        }
+                    }
+                    JSONArray listColumn = new JSONArray();
+
+                    int index = 0;
+                    for (int r = 0; r < rows; r++) {
+                        row = sheet.getRow(r);
+                        if (row != null) {
+                            for (int c = 0; c < cols; c++) {
+                                cell = row.getCell((short) c);
+                                if (cell != null) {
+                                    JSONObject json = new JSONObject();
+                                    json.put("index", index++);
+                                    json.put("value", cell.toString());
+                                    listColumn.put(json);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    this.listColumn = listColumn;
+
+                } catch (Exception ioe) {
+                    ioe.printStackTrace();
+                }
             }
         } catch (Exception e) {
 
@@ -103,20 +155,64 @@ public class ProcessingExcelFile implements ProcessExcel {
         //ids là để xác định ids transaction
         int indexOfIds = ids.getInt("index");
         int indexOfItems = items.getInt("index");
-        Sheet mysheet = workbook.getSheetAt(0);
+        
+        
 
         JSONArray list = new JSONArray();
-        for (Row r : mysheet) {
-            JSONObject json = new JSONObject();
-            for (Cell c : r) {
-                if (c.getColumnIndex() == indexOfIds) {
-                    json.put("idItem", c.getStringCellValue());
+
+        if (file.getName().contains(".xlsx")) {
+            Sheet mysheet = workbook.getSheetAt(0);
+            for (Row r : mysheet) {
+                JSONObject json = new JSONObject();
+                for (Cell c : r) {
+                    if (c.getColumnIndex() == indexOfIds) {
+                        json.put("idItem", c.getStringCellValue());
+                    }
+                    if (c.getColumnIndex() == indexOfItems) {
+                        json.put("valueItem", c.getStringCellValue());
+                    }
                 }
-                if (c.getColumnIndex() == indexOfItems) {
-                    json.put("valueItem", c.getStringCellValue());
+                list.put(json);
+            }
+        } else if (file.getName().contains(".xls")) {
+            HSSFSheet sheet_xls = wb_xls.getSheetAt(0);
+            int rows; // No of rows
+            rows = sheet_xls.getPhysicalNumberOfRows();
+            HSSFRow row;
+            HSSFCell cell;
+
+            int cols = 0; // No of columns
+            int tmp = 0;
+
+            // This trick ensures that we get the data properly even if it doesn't start from first few rows
+            for (int i = 0; i < 10 || i < rows; i++) {
+                row = sheet_xls.getRow(i);
+                if (row != null) {
+                    tmp = sheet_xls.getRow(i).getPhysicalNumberOfCells();
+                    if (tmp > cols) {
+                        cols = tmp;
+                    }
                 }
             }
-            list.put(json);
+
+            for (int r = 0; r < rows; r++) {
+                JSONObject json = new JSONObject();
+                row = sheet_xls.getRow(r);
+                if (row != null) {
+                    for (int c = 0; c < cols; c++) {
+                        cell = row.getCell((short) c);
+                        if (cell != null) {
+                            if (cell.getColumnIndex() == indexOfIds) {
+                                json.put("idItem", cell.toString());
+                            }
+                            if (cell.getColumnIndex() == indexOfItems) {
+                                json.put("valueItem", cell.toString().replaceAll(" ", "_"));
+                            }
+                        }
+                    }
+                }
+                list.put(json);
+            }
         }
 
         System.out.println("============>" + list.length());

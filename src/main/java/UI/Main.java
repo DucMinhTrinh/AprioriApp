@@ -26,6 +26,13 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import static org.apache.poi.hssf.usermodel.HeaderFooter.file;
+import org.apache.poi.openxml4j.exceptions.OLE2NotOfficeXmlFileException;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -200,6 +207,46 @@ public class Main extends javax.swing.JFrame {
                     }
                     break;
                 }
+            } catch (OLE2NotOfficeXmlFileException exception) {
+                try {
+                    POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream(file));
+                    HSSFWorkbook wb = new HSSFWorkbook(fs);
+                    HSSFSheet sheet = wb.getSheetAt(0);
+                    HSSFRow row;
+                    HSSFCell cell;
+
+                    int rows; // No of rows
+                    rows = sheet.getPhysicalNumberOfRows();
+
+                    int cols = 0; // No of columns
+                    int tmp = 0;
+
+                    // This trick ensures that we get the data properly even if it doesn't start from first few rows
+                    for (int i = 0; i < 10 || i < rows; i++) {
+                        row = sheet.getRow(i);
+                        if (row != null) {
+                            tmp = sheet.getRow(i).getPhysicalNumberOfCells();
+                            if (tmp > cols) {
+                                cols = tmp;
+                            }
+                        }
+                    }
+
+                    int r = 0;
+                    row = sheet.getRow(r);
+                    if (row != null) {
+                        for (int c = 0; c < cols; c++) {
+                            cell = row.getCell((short) c);
+                            if (cell != null) {
+                                jComboBox1.addItem(cell.toString());
+                                jComboBox2.addItem(cell.toString());
+                            }
+                        }
+                    }
+
+                } catch (Exception ioe) {
+                    ioe.printStackTrace();
+                }
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -207,16 +254,18 @@ public class Main extends javax.swing.JFrame {
         } else {
             JOptionPane.showMessageDialog(rootPane, "Chọn file excel ");
         }
+
+
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
         // TODO add your handling code here:
         // convert dữ liệu từ file excel thành file txt
-        if(filePath!=null) {
-            if(changeAttribute=true){
+        if (filePath != null) {
+            if (changeAttribute = true) {
                 ProcessingExcelFile pef = new ProcessingExcelFile(filePath);
-                pef.convertToTxt(jComboBox1.getSelectedIndex(),jComboBox2.getSelectedIndex());
-                changeAttribute=false;
+                pef.convertToTxt(jComboBox1.getSelectedIndex(), jComboBox2.getSelectedIndex());
+                changeAttribute = false;
             }
 
             // thực hiện phân tích bằng thuật toán Apriori
@@ -224,44 +273,42 @@ public class Main extends javax.swing.JFrame {
             File inputFile = new File(filePathtxt);
             double minSupport = Double.parseDouble(jTextField1.getText().toString());
             double minConfidence = Double.parseDouble(jTextField2.getText().toString());
-            Apriori<NamedItem> apriori =  new Apriori.Builder<NamedItem>(minSupport).generateRules(minConfidence).create();
+            Apriori<NamedItem> apriori = new Apriori.Builder<NamedItem>(minSupport).generateRules(minConfidence).create();
             Iterator<Transaction<NamedItem>> iterator = new DataIterator(inputFile);
 
             Output<NamedItem> output = apriori.execute(iterator);
 
-
-    //        Filter<ItemSet> filter = Filter.forItemSets().bySize(2);
+            //        Filter<ItemSet> filter = Filter.forItemSets().bySize(2);
             FrequentItemSets<NamedItem> frequentItemSets = output.getFrequentItemSets();
-    //        frequentItemSets = frequentItemSets.filter(filter);
+            //        frequentItemSets = frequentItemSets.filter(filter);
             long timeExcute = output.getRuntime();
-            System.out.println("Time Running:"+timeExcute + " ms.") ;
-            System.out.println("Frequent Items Number is : "+frequentItemSets.size());
-
+            System.out.println("Time Running:" + timeExcute + " ms.");
+            System.out.println("Frequent Items Number is : " + frequentItemSets.size());
 
             //In ra các dánh sách phổ biên
             Iterator<ItemSet<NamedItem>> it = frequentItemSets.iterator();
-            String frequentStr="<html>";
+            String frequentStr = "<html>";
             while (it.hasNext()) {
                 ItemSet<NamedItem> next = it.next();
-    //            System.out.println(next.toString()+" - " +next.getSupport());  
-                frequentStr +=next.toString()+" - " +next.getSupport() +"<br>";
+                //            System.out.println(next.toString()+" - " +next.getSupport());  
+                frequentStr += next.toString() + " - " + next.getSupport() + "<br>";
             }
             jLabel5.setText(frequentStr);
 
             //Luật liên kết
             RuleSet<NamedItem> ruleSet = output.getRuleSet();
             Iterator<AssociationRule<NamedItem>> itRule = ruleSet.iterator();
-            String rules ="<html>";
-            while(itRule.hasNext()){
-                AssociationRule<NamedItem> a =itRule.next();
-                rules += a.toString()+"<br>";;
-    //            System.out.println(a.getBody().toString()+"====>");
-    //            System.out.println(a.getHead().toString());       
+            String rules = "<html>";
+            while (itRule.hasNext()) {
+                AssociationRule<NamedItem> a = itRule.next();
+                rules += a.toString() + "<br>";;
+                //            System.out.println(a.getBody().toString()+"====>");
+                //            System.out.println(a.getHead().toString());       
             }
-    //        JOptionPane.showMessageDialog(rootPane,rules);
+            //        JOptionPane.showMessageDialog(rootPane,rules);
             jLabel6.setText(rules);
-        }else{
-            JOptionPane.showMessageDialog(rootPane,"Chọn file excel");
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Chọn file excel");
         }
     }//GEN-LAST:event_jButton2MouseClicked
 

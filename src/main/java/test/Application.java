@@ -17,7 +17,9 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map.Entry;
 
 /**
  *
@@ -28,8 +30,8 @@ public class Application {
     public static void main(String[] args) {
         String filePath = "data.txt";
         File inputFile = new File(filePath);
-        double minSupport = 0.05;
-        double minConfidence = 0.8;
+        double minSupport = 0.125;
+        double minConfidence = 1;
         Apriori<NamedItem> apriori =  new Apriori.Builder<NamedItem>(minSupport).generateRules(minConfidence).create();
         Iterator<Transaction<NamedItem>> iterator = new DataIterator(inputFile);
         
@@ -55,12 +57,23 @@ public class Application {
         //Luật liên kết
         RuleSet<NamedItem> ruleSet = output.getRuleSet();
         Iterator<AssociationRule<NamedItem>> itRule = ruleSet.iterator();
+         HashMap<String, String> hmap = new HashMap<String, String>(); // hashmap lưu luật liên kết
         while(itRule.hasNext()){
             AssociationRule<NamedItem> a =itRule.next();
-            System.out.println(a.getBody().toString()+"====>");
-            System.out.println(a.getHead().toString());
+            System.out.println(a.getBody().toString()+"====>"+a.getHead().toString());
+            hmap.put(a.getBody().toString(),a.getHead().toString());
         }
-        
+
+        // tìm kiếm
+        String keyword = "22752, 84029E, 84029G, 85123A";
+        System.out.println("Search result: ");
+        for (Entry<String, String> e : hmap.entrySet()) {
+            if (e.getKey().toLowerCase().contains(keyword.toLowerCase())) {
+                //add to my result list
+                System.out.println(e.getValue());
+            }
+        }
+
     }
 
     public File getInputFile(String fileName) {
