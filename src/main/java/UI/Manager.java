@@ -5,18 +5,37 @@
  */
 package UI;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author MinhPC
  */
-public class Manager extends Thread{
+public class Manager extends Thread {
+
     public Main main;
 
     public Manager(Main main) {
         this.main = main;
     }
-    
-    public void setFilePath(String str){
+
+    @Override
+    public void run() {
+        while (main.changeAttribute) {
+
+            try {
+                main.setStatusUI("Converting excel to txt");
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        main.setStatusUI("Ready excute");
+
+    }
+
+    public void setFilePath(String str) {
         main.setFilePathUI(str);
     }
 }

@@ -30,8 +30,8 @@ public class Application {
     public static void main(String[] args) {
         String filePath = "data.txt";
         File inputFile = new File(filePath);
-        double minSupport = 0.125;
-        double minConfidence = 1;
+        double minSupport = 0.01;
+        double minConfidence = 0.01;
         Apriori<NamedItem> apriori =  new Apriori.Builder<NamedItem>(minSupport).generateRules(minConfidence).create();
         Iterator<Transaction<NamedItem>> iterator = new DataIterator(inputFile);
         

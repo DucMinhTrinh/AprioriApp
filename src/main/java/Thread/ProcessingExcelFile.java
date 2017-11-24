@@ -155,8 +155,6 @@ public class ProcessingExcelFile implements ProcessExcel {
         //ids là để xác định ids transaction
         int indexOfIds = ids.getInt("index");
         int indexOfItems = items.getInt("index");
-        
-        
 
         JSONArray list = new JSONArray();
 
@@ -249,6 +247,7 @@ public class ProcessingExcelFile implements ProcessExcel {
     public void convertToTxt(int collumId, int collumItem) {
 
         JSONArray listT = this.listTransaction(this.listColumn.getJSONObject(collumId), this.listColumn.getJSONObject(collumItem));
+        this.transactionNumber = listT.length();
         try {
             //Bước 1: Tạo đối tượng luồng và liên kết nguồn dữ liệu
             File f = new File(System.getProperty("user.dir") + "/data.txt");
