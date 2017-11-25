@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -274,7 +275,81 @@ public class ProcessingExcelFile implements ProcessExcel {
             System.out.println("Loi ghi file: " + ex);
         }
     }
+    
+    public void convertToTxtFColumn(DefaultTableModel model) {
+        ArrayList<Integer> array = new ArrayList<Integer>();
+        int j = 0;
+        for (int i = 0; i < model.getRowCount(); i++) {
+            boolean val = (boolean) model.getValueAt(i, 1);
+            if (val == true) {
+                System.out.println(i);
+                array.add(i);
+                j++;
+            }
+        }
+        System.out.println(array.toString());
+        try {
+            //Bước 1: Tạo đối tượng luồng và liên kết nguồn dữ liệu
+            File f = new File(System.getProperty("user.dir") + "/data.txt");
+            FileWriter fw = new FileWriter(f);
 
+            //Bước 2: Ghi dữ liệu
+            if (file.getName().contains(".xlsx")) {
+                Sheet mysheet = workbook.getSheetAt(0);
+                System.out.println("array length :  " + array.size());
+                for (Row r : mysheet) {
+                    for (int i = 0; i < array.size(); i++) {
+                        Cell cell = r.getCell(array.get(i));
+                        String value = cell.getStringCellValue();
+                        fw.write(value.replaceAll(" ", "_"));
+                        fw.write("   ");
+                    }
+                    fw.write("\r\n");
+                }
+            } else if (file.getName().contains(".xls")) {
+                HSSFSheet sheet_xls = wb_xls.getSheetAt(0);
+                int rows; // No of rows
+                rows = sheet_xls.getPhysicalNumberOfRows();
+                HSSFRow row;
+                HSSFCell cell;
+
+                int cols = 0; // No of columns
+                int tmp = 0;
+
+                // This trick ensures that we get the data properly even if it doesn't start from first few rows
+                for (int i = 0; i < 10 || i < rows; i++) {
+                    row = sheet_xls.getRow(i);
+                    if (row != null) {
+                        tmp = sheet_xls.getRow(i).getPhysicalNumberOfCells();
+                        if (tmp > cols) {
+                            cols = tmp;
+                        }
+                    }
+                }
+
+                for (int r = 1; r < rows; r++) {
+                    row = sheet_xls.getRow(r);
+                    if (row != null) {
+                        for (int i = 0; i < array.size(); i++) {
+                            HSSFCell cel = row.getCell(array.get(i));
+                            String value = cel.toString().replaceAll(" ", "_");
+                            
+                            fw.write(value);
+                            fw.write("   ");
+                        }
+                    }
+                    fw.write("\r\n");
+                }
+            }
+
+
+            //Bước 3: Đóng luồng
+            fw.close();
+        } catch (IOException ex) {
+            System.out.println("Loi ghi file: " + ex);
+        }
+    }
+    
     public static void main(String[] args) {
 //        String filePath = "data/OnlineRetail2.xlsx";
 //        ProcessingExcelFile demo = new ProcessingExcelFile(filePath);
