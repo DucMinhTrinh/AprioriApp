@@ -9,6 +9,8 @@ import de.mrapp.apriori.ItemSet;
 import de.mrapp.apriori.Output;
 import de.mrapp.apriori.RuleSet;
 import de.mrapp.apriori.Transaction;
+import de.mrapp.apriori.metrics.Confidence;
+import de.mrapp.apriori.metrics.Support;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.io.File;
@@ -408,6 +410,11 @@ public class Main extends javax.swing.JFrame {
         );
 
         jTextField3.setText("Search rules....");
+        jTextField3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTextField3MouseClicked(evt);
+            }
+        });
         jTextField3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField3ActionPerformed(evt);
@@ -468,15 +475,15 @@ public class Main extends javax.swing.JFrame {
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel11))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 72, Short.MAX_VALUE)
-                .addGroup(bodyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(bodyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 750, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 750, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(bodyLayout.createSequentialGroup()
                         .addComponent(jLabel10)
                         .addGap(18, 18, 18)
-                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 538, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(364, 364, 364))
+                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 538, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 708, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1))
+                .addGap(406, 406, 406))
         );
         bodyLayout.setVerticalGroup(
             bodyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -552,6 +559,7 @@ public class Main extends javax.swing.JFrame {
             if (typeAnalysis.equals("row")) {
                 if (filePath.contains(".csv")) {
                     try {
+                        filePathTxt=null;
                         filePathExcelConverted = "dataFromCsv.xls";
                         this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                         manageUI.convertCsvToExcel(filePath, filePathExcelConverted);
@@ -561,8 +569,10 @@ public class Main extends javax.swing.JFrame {
                         Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } else if (filePath.contains(".xlsx")) {
+                    filePathTxt=null;
                     manageUI.showCriteriaAndIdFromExcel(filePath, jComboBox1, jComboBox2);
                 } else if (filePath.contains(".xls")) {
+                    filePathTxt=null;
                     manageUI.showCriteriaAndIdFromExcel(filePath, jComboBox1, jComboBox2);
                 } else if (filePath.contains(".txt")) {
 
@@ -686,8 +696,10 @@ public class Main extends javax.swing.JFrame {
             String rules = "<html>";
             while (itRule.hasNext()) {
                 AssociationRule<NamedItem> a = itRule.next();
-                rules += a.toString() + "<br>";
-                hmapRules.put(a.getBody().toString(), a.getHead().toString());
+                String confident = "&emsp; &emsp; &emsp;<b>confident</b>:"+new Confidence().evaluate(a);
+                String support = "&emsp; &emsp; &emsp;<b>support</b>:"+new Support().evaluate(a);
+                rules += a.toString() +confident+support + "<br>";
+                hmapRules.put(a.getBody().toString(), a.getHead().toString()+confident+support );
             }
 
             jLabel6.setText(rules);
@@ -717,7 +729,7 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField3KeyReleased
 
     private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
-        // TODO add your handling code here:
+        // TODO add your handling c
     }//GEN-LAST:event_jTextField3ActionPerformed
 
     private void jComboBox3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox3ActionPerformed
@@ -766,6 +778,11 @@ public class Main extends javax.swing.JFrame {
         // TODO add your handling code here:
 //        changeAttribute = true;
     }//GEN-LAST:event_jComboBox2ActionPerformed
+
+    private void jTextField3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextField3MouseClicked
+        // TODO add your handling code here:
+        jTextField3.setText("");
+    }//GEN-LAST:event_jTextField3MouseClicked
 
     /**
      * @param args the command line arguments

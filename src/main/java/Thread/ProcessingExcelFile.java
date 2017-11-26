@@ -168,7 +168,9 @@ public class ProcessingExcelFile implements ProcessExcel {
                         json.put("idItem", c.getStringCellValue());
                     }
                     if (c.getColumnIndex() == indexOfItems) {
-                        json.put("valueItem", c.getStringCellValue());
+                        if(c.getStringCellValue()!=null && !c.getStringCellValue().equals(""))
+                        json.put("valueItem", c.getStringCellValue().replaceAll(" ", "_"));
+                        else json.put("valueItem", "null");
                     }
                 }
                 list.put(json);
@@ -215,7 +217,7 @@ public class ProcessingExcelFile implements ProcessExcel {
         }
 
         System.out.println("============>" + list.length());
-
+        
         JSONArray result = new JSONArray();
         int transactionNumber = 0;
         int current = 0;
@@ -223,8 +225,11 @@ public class ProcessingExcelFile implements ProcessExcel {
             JSONObject _new = new JSONObject();
             JSONArray itemList = new JSONArray();
             JSONObject json = list.getJSONObject(current);
+            System.out.println(json.toString());
             _new.put("id", json.getString("idItem"));
-            itemList.put(json.getString("valueItem"));
+            if(json.getString("valueItem")!=null&&json.getString("valueItem")!="")
+                itemList.put(json.getString("valueItem"));
+            else itemList.put(" ");
             int temp = current + 1;
             try {
                 while (list.getJSONObject(temp).getString("idItem").equals(json.getString("idItem"))) {
